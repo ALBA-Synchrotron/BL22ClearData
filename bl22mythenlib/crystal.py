@@ -103,132 +103,13 @@ class CrystalSi(BaseCrystal):
         a = 0.5430710e-9
         BaseCrystal.__init__(self, a, hkl)
 
+
 class CrystalGe(BaseCrystal):
     """
-    Class for the .
+    Class for the Germanium.
     """
     def __init__(self, hkl):
         a = 0.5657900e-9
         BaseCrystal.__init__(self, a, hkl)
 
-
-
-class Crystal(object):
-    """
-    Class to store the crystal hkl values and 'a' constant in meters.
-    """
-
-    si111 = {'a': 0.5430710e-9, 'h': 1, 'k': 1, 'l': 1}
-    si220 = {'a': 0.5430710e-9, 'h': 2, 'k': 2, 'l': 0}
-    si400 = {'a': 0.5430710e-9, 'h': 4, 'k': 0, 'l': 0}
-    ge111 = {'a': 0.5657900e-9, 'h': 1, 'k': 1, 'l': 1}
-    hc = 0.00123984193e-3  # [eV*m]
-
-    def __init__(self, crystal='Si111', n=1):
-        """
-        Constructor of the class
-        :param crystal: str
-        :param n: int
-        """
-
-        self._crystal_name = None
-        self._crystal_values = None
-        self._n = None
-
-        self.crystal = crystal
-        self.order = n
-
-    @property
-    def crystal(self):
-        """
-        Get the crystal used
-        :param crystal: str
-        :return: None
-        """
-        return self._crystal_name
-
-    @crystal.setter
-    def crystal(self, value):
-        """
-        Set the crystal used
-        :param value: str
-        :return: None
-        """
-        self._crystal_name = value
-        self._crystal_values = self.__getattribute__(value.lower())
-
-    @property
-    def order(self):
-        """
-        Get the crystal order
-        :return: int
-        """
-        return self._n
-
-    @order.setter
-    def order(self, value):
-        """
-        Set the crystal order
-        :param value: int
-        :return: None
-        """
-        self._n = value
-
-    @property
-    def distance(self):
-        """
-        Get the distance between atomic planes in meters
-            d=a/sqrt(h^2+k^2+l^2) for a cubic crystal.
-        :return: float
-        """
-        aa = self._crystal_values['a']
-        hh = self._crystal_values['h']
-        kk = self._crystal_values['k']
-        ll = self._crystal_values['l']
-        d = aa / math.sqrt(hh**2 + kk**2 + ll**2)
-        return d
-
-    def get_energy(self, bragg):
-        """
-        Calculate the energy[eV] for a determine bragg angle[degrees]
-           energy = hc/wavelength
-           n*wavelength=2*d*sin(bragg).
-           'a' is the lattice spacing (of 0.5430710nm in the case of Silicon).
-           'd' is the distance between planes of crystalline structure.
-
-        :param bragg: float
-        :return: float
-        """
-
-        bragg_rad = deg2rad(bragg)
-        d = self.distance
-        wavelength = 2 * d * math.sin(bragg_rad) / self._n
-        energy = self.hc / wavelength
-        return energy
-
-    def get_bragg(self, energy):
-        """
-        Calculate the bragg angle[degrees] for a determine energy[eV]
-           energy = hc/wavelength
-           n*wavelength=2*d*sin(bragg).
-           Where 'd' is the distance between atomic planes.
-           We also have: d=a/sqrt(h^2+k^2+l^2) for a cubic crystal.
-           'a' is the lattice spacing (of 0.5430710nm in the case of Silicon).
-           'd' is the distance between planes of crystalline structure.
-
-        :param energy: float
-        :return: float
-        """
-        wavelength = self.hc / energy
-        d = self.distance
-        value = wavelength / (2 * d)
-        if value > 1 or value < -1:
-            msg = 'It is not possible to calculate bragg for this energy: ' \
-                  '{0} eV with the crystal set {1}'.format(energy,
-                                                           self.crystal)
-            raise ValueError(msg)
-
-        bragg_rad = math.asin(value)
-        bragg = rad2deg(bragg_rad)
-        return bragg
 
