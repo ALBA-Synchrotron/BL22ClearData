@@ -39,36 +39,35 @@ class BaseCrystal(object):
         :param n: int
         :return: float
         """
-        d = self._a/ np.linalg.norm(self._hkl * n)
+        d = self._a / np.linalg.norm(self._hkl * n)
         return float(d)
 
-    def get_bragg(self, energy, n=1):
+    def get_braggs(self, energy, n=1):
         """
         Calculate the bragg angle for a certain energy and order.
-        :param energy: float -> Energy in eV
+        :param energy: [float] -> Energy in eV
         :param n: int -> Order
-        :return: float
+        :return: buffer -> Pointer to the array buffer
         """
         d = self.get_distance(n)
-        wavelength = self.hc * energy
+        wavelength = self.hc * np.array(energy)
         sin_bragg = wavelength / (2 * d)
-        if np.abs(sin_bragg) >= 1:
-            bragg = 90.0
-        else:
-            bragg = np.rad2deg(np.arcsin(sin_bragg)).item()
-        return bragg
+        bragg = np.rad2deg(np.arcsin(sin_bragg))
+        np.place(bragg, np.isnan(bragg), 90)
 
-    def get_energy(self, bragg, n=1):
+        return np.getbuffer(bragg)
+
+    def get_energies(self, bragg, n=1):
         """
         Calculate the energy in eV of certain bragg and order.
-        :param bragg: float
+        :param bragg: [float]
         :param n: int
-        :return: float
+        :return: buffer -> Pointer to the array buffer.
         """
         d = self.get_distance(n)
         wavelength = 2 * d * np.sin(np.deg2rad(bragg))
         energy = wavelength / self.hc
-        return energy
+        return np.getbuffer(energy)
 
     def find_order(self, energy, bragg_zero):
         """
