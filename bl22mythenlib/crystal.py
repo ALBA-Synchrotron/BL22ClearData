@@ -42,42 +42,42 @@ class BaseCrystal(object):
         d = self._a / np.linalg.norm(self._hkl * n)
         return float(d)
 
-    def get_braggs(self, energy, n=1):
+    def get_braggs(self, energies, n=1):
         """
         Calculate the bragg angle for a certain energy and order.
-        :param energy: [float] -> Energy in eV
+        :param energies: [float] -> Energy in eV
         :param n: int -> Order
         :return: buffer -> Pointer to the array buffer
         """
         d = self.get_distance(n)
-        wavelength = self.hc * np.array(energy)
+        wavelength = self.hc * np.array(energies)
         sin_bragg = wavelength / (2 * d)
         bragg = np.rad2deg(np.arcsin(sin_bragg))
         np.place(bragg, np.isnan(bragg), 90)
 
         return np.getbuffer(bragg)
 
-    def get_energies(self, bragg, n=1):
+    def get_energies(self, braggs, n=1):
         """
         Calculate the energy in eV of certain bragg and order.
-        :param bragg: [float]
+        :param braggs: [float]
         :param n: int
         :return: buffer -> Pointer to the array buffer.
         """
         d = self.get_distance(n)
-        wavelength = 2 * d * np.sin(np.deg2rad(bragg))
+        wavelength = 2 * d * np.sin(np.deg2rad(braggs))
         energy = wavelength / self.hc
         return np.getbuffer(energy)
 
-    def find_order(self, energy, bragg_zero):
+    def find_order(self, energies, bragg_zero):
         """
         Find the order used to a certain energy and initial bragg angle.
-        :param energy:
+        :param energies:
         :param bragg_zero:
         :return:
         """
         d = self.get_distance(1)
-        wavelength = self.hc * energy
+        wavelength = self.hc * energies
         orders = np.arange(1, np.floor(2 * d / wavelength) + 1)
         braggs = np.rad2deg(np.arcsin(wavelength / (2. * d) * orders))
         deltas_braggs = np.abs(braggs - bragg_zero)
