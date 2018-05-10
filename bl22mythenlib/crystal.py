@@ -77,7 +77,7 @@ class BaseCrystal(object):
         :return:
         """
         d = self.get_distance(1)
-        wavelength = self.hc * energies
+        wavelength = self.hc / energies
         orders = np.arange(1, np.floor(2 * d / wavelength) + 1)
         braggs = np.rad2deg(np.arcsin(wavelength / (2. * d) * orders))
         deltas_braggs = np.abs(braggs - bragg_zero)
