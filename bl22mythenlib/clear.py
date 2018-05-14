@@ -49,19 +49,27 @@ class Clear(object):
         """
         pixels = np.array(pixels)
         energies = self.a * pixels + self.b
-        return  energies
+        return energies
 
-    def elastic_line_calibration(self, raw_data, energies, clear_bragg,
-                                 order=None, threshold=0.7):
+    def elastic_line_calibration(self, mythen_data, energies, clear_bragg,
+                                 order=None, threshold=0.7,
+                                 pixel_limit_noise=600):
         self.log.debug('Entering on elastic_line_calibration.')
+        self.log.debug('mythen_data: {}'.format(mythen_data))
+        self.log.debug('energies: {}'.format(energies))
+        self.log.debug('clear_bragg: {}'.format(clear_bragg))
+        self.log.debug('order: {}'.format(order))
+        self.log.debug('threshold: {}'.format(threshold))
+
         # Calculate parameters for calibration
         # Find the order if it is not passed
         # TODO: this information should pass to the system
         if order is None:
             bragg_angle = clear_bragg + self.bragg_offset
-            self.order = self.crystal.find_order(energies, bragg_angle)
+            self.order = self.crystal.find_order(energies.mean(), bragg_angle)
 
-        self.mythen.raw_data = raw_data
+        self.mythen.raw_data = mythen_data
+        self.mythen.pixel_limit_noise = pixel_limit_noise
 
         # Calculate the scale factor index vs energy_mono:
         # energy = k*i + energy[0]
@@ -95,7 +103,7 @@ class Clear(object):
         self.log.debug('Fit 2D: {}'.format(self.mythen.fit_2d))
         self.log.debug('Fit 1D pixel: {}'.format(self.mythen.fit_1d_pixel))
         self.log.debug('Fit 1D index: {}'.format(self.mythen.fit_1d_index))
-        self.log.debug('Clear: e0={}, p0={}, a={}, b={}, k={}, '
+        self.log.info('Clear: e0={}, p0={}, a={}, b={}, k={}, '
                        'order={}'.format(self.e0, self.p0, self.a, self.b,
                                          self.k, self.order))
         self.log.debug('Exiting of elastic_line_calibration.')

@@ -64,7 +64,8 @@ class Mythen(object):
         self.fit_2d = DataFitted()
         self.fit_1d_pixel = DataFitted()
         self.fit_1d_index = DataFitted()
-        self.raw_data = data
+        if data is not None:
+            self.raw_data = data
         self.disp_func = disp_func
         self.dead_pixels = dead_pixels
 
@@ -72,7 +73,8 @@ class Mythen(object):
         idx = np.arange(1, self.nr_pixels + 1)
         mask = np.zeros(self.nr_pixels, dtype="bool")
         mask[self._dead_pixels - 1] = True
-        self._pixels_masked = np.ma.masked_array(idx, mask=mask, dtype="bool")
+        mask[:self.pixel_limit_noise] = [True] * self.pixel_limit_noise
+        self._pixels_masked = np.ma.masked_array(idx, mask=mask)
 
     @property
     def dead_pixels(self):
@@ -85,6 +87,10 @@ class Mythen(object):
         else:
             self._dead_pixels = np.array(value)
         self._update_bad_channels()
+
+    @property
+    def data(self):
+        return self._data_masked
 
     @property
     def raw_data(self):
@@ -128,10 +134,12 @@ class Mythen(object):
         """
         if compressed:
             colums = self._pixels_masked.compressed()
-            data = self._data_masked.data[:, colums]
+            data_shape = self._data_masked.shape
+            data = self._data_masked.compressed().reshape(data_shape[0],
+                                                          len(colums))
         else:
             colums = self.nr_pixels
-            data = self.raw_data.copy()
+            data = self._data_masked
 
         if remove_noise:
             data = data - self.get_pixel_noise()
@@ -148,7 +156,7 @@ class Mythen(object):
         """
         # a and b  are calculated respect to raw and column starting at
         # index 0.
-        a, b, p0, i0, p0_std, i0_std = linear_regression(self.raw_data,
+        a, b, p0, i0, p0_std, i0_std = linear_regression(self.data,
                                                          threshold, order)
         # we have to shift to compensate pixel number 1 at index 0
         # y = ax + b --> y = a(x'-1) + b <==> ax' -a + b
@@ -162,7 +170,7 @@ class Mythen(object):
         :return:
         """
 
-        rows, colums, data = self.get_data(compressed=True, removeNoise=True)
+        rows, colums, data = self.get_data(compressed=True, remove_noise=True)
         X, Y = np.meshgrid(colums, rows)
         data_sum = data.sum()
         data /= data_sum
@@ -202,7 +210,7 @@ class Mythen(object):
         :param axis_x:
         :return:
         """
-        rows, colums, data = self.get_data(compressed=True, removeNoise=True)
+        rows, colums, data = self.get_data(compressed=True, remove_noise=True)
         axis = [1, 0][axis_x]
         x = [rows, colums][axis_x]
         disp_exp = data.max(axis=axis)

@@ -76,3 +76,84 @@ def get_best_fit(x, y, func):
     except:
         x_max, x_mean, x_std = first_point
     return x_max, x_mean, x_std
+
+
+def read_raw_data_spec(filename, scan_id):
+    with open(filename, 'r') as f:
+        found = False
+        while True:
+            line = f.readline()
+            line_lower = line.lower()
+            start_scan = '#s {0}'.format(scan_id)
+            if start_scan in line_lower:
+                found = True
+                break
+
+        if found:
+            snapshots = {}
+            data = {}
+            snapshots_names = []
+            snapshots_values = []
+            channels_names = []
+            channel_1d = ''
+            # Skip header
+            while True:
+                line = f.readline()
+                line_lower = line.lower()
+                if '#o' in line_lower or '#l' in line_lower:
+                    break
+
+            # Read snapshots channels names
+            while True:
+                if '#o' not in line.lower():
+                    break
+                snapshots_names += line.split()[1:]
+                line = f.readline()
+
+            # Read snapshots channels values
+            while True:
+                line_lower = line.lower()
+                if '#p' not in line_lower:
+                    break
+                snapshots_values += map(float, line.split()[1:])
+                line = f.readline()
+
+            if len(snapshots_names) > 0:
+                if len(snapshots_names) != len(snapshots_values):
+                    print('Error on read snapshots')
+                else:
+                    for name, value in zip(snapshots_names, snapshots_values):
+                        snapshots[name] = value
+
+            while True:
+                line_lower = line.lower()
+                if '#l' in line_lower:
+                    break
+                if '#@' in line_lower:
+                    if 'det' in line_lower:
+                        channel_1d = line.split()[1]
+                        data[channel_1d] = []
+                line = f.readline()
+
+            # Read channels name
+            channels_names += line.split()[1:]
+            for name in channels_names:
+                data[name] = []
+
+            # Read channels data
+            while True:
+                line = f.readline()
+                if '#' in line:
+                    break
+                if '@a' in line.lower():
+                    # Read 1d data
+                    ch1d_data = map(float, line.split()[1:])
+                    data[channel_1d].append(ch1d_data)
+                else:
+                    channels_data = map(float, line.split())
+                    for name, value in zip(channels_names, channels_data):
+                        data[name].append(value)
+
+            return data, snapshots
+
+        return None, None
