@@ -17,7 +17,7 @@
 import numpy as np
 import logging
 from .mythen import Mythen
-from .crystal import CrystalSi
+from crystal import CrystalSi
 
 
 class Clear(object):
