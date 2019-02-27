@@ -219,7 +219,6 @@ class Mythen(object):
         z = 1 / (2 * np.pi * alpha * beta) * np.exp(-arg)
         return z / z.sum()
 
-    def calc_dispersion_1d(self, axis_x=True):
     def calc_dispersion_1d(self, pixel_projection=True):
         """
         Metho to calculate the 1D dispersion fitting

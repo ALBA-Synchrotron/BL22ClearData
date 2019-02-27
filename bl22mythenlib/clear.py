@@ -82,10 +82,10 @@ class Clear(object):
         self.mythen.calc_dispersion_2d()
 
         # Fit data with 1D dispersion by using pixel projection
-        self.mythen.calc_dispersion_1d(axis_x=True)
+        self.mythen.calc_dispersion_1d(pixel_projection=True)
 
         # Fit data with 1D dispersion by using index projection
-        self.mythen.calc_dispersion_1d(axis_x=False)
+        self.mythen.calc_dispersion_1d(pixel_projection=False)
 
         # Use the 2D dispersion fitting as linear interpolation of the pixel
         # to energy equation.
