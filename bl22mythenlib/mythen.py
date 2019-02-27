@@ -205,19 +205,20 @@ class Mythen(object):
         return z / z.sum()
 
     def calc_dispersion_1d(self, axis_x=True):
+    def calc_dispersion_1d(self, pixel_projection=True):
         """
         Metho to calculate the 1D dispersion fitting
         :param axis_x:
         :return:
         """
         rows, colums, data = self.get_data(compressed=True, remove_noise=True)
-        axis = [1, 0][axis_x]
-        x = [rows, colums][axis_x]
+        axis = [1, 0][pixel_projection]
+        x = [rows, colums][pixel_projection]
         disp_exp = data.max(axis=axis)
 
         x_max, x_mean, x_std = get_best_fit(x, disp_exp, self.disp_func)
         disp_theo = self.disp_func(x, x_max, x_mean, x_std)
-        if axis_x:
+        if pixel_projection:
             # Pixel information
             self.fit_1d_pixel = DataFitted(p0=x_mean, p0_std=x_std,
                                            disp_exp=disp_exp,
