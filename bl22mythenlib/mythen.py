@@ -57,7 +57,7 @@ class Mythen(object):
     Class for the Mythen 1K detector
     """
     nr_pixels = 1280
-    pixels_size = 50e-6
+    pixels_size = 50e-6  # width 50um
 
     def __init__(self, data=None, dead_pixels=None,
                  disp_func=gauss_function):
@@ -98,11 +98,11 @@ class Mythen(object):
 
     @property
     def data(self):
-        return self._data_masked
+        return self._data_masked.copy()
 
     @property
     def raw_data(self):
-        return self._data
+        return self._data.copy()
 
     @raw_data.setter
     def raw_data(self, value):
@@ -153,8 +153,8 @@ class Mythen(object):
             data = self._data_masked.compressed().reshape(data_shape[0],
                                                           len(colums))
         else:
-            colums = self.nr_pixels
-            data = self._data_masked
+            colums = self.nr_pixels.copy()
+            data = self._data_masked.copy()
 
         if remove_noise:
             data = data - self.get_pixel_noise()
