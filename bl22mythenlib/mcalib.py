@@ -8,6 +8,7 @@ def mcalib(filename, scan_id, threshold=0.7,
     clear = Clear()
 
     if ftype == 'spec':
+        print 'in spec'
         data, snapshots = read_raw_data_spec(filename, [scan_id])[scan_id]
     else:
         raise ValueError('Only read spec files')
