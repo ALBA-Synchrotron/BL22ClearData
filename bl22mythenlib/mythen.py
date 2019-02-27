@@ -85,6 +85,16 @@ class Mythen(object):
         self._pixels_masked = np.ma.masked_array(idx, mask=mask)
 
     @property
+    def mask(self):
+        if self._data_masked is None:
+            mask = np.ma.make_mask(np.zeros(self.nr_pixels, dtype='bool'))
+        else:
+            mask = self._data_masked.mask
+            if len(mask.shape) > 1:
+                mask = mask[0]
+        return mask
+
+    @property
     def dead_pixels(self):
         return self._dead_pixels
 
@@ -107,10 +117,16 @@ class Mythen(object):
     @raw_data.setter
     def raw_data(self, value):
         self._data = np.array(value)
+        mask = self._pixels_masked.mask
+        if self._roi is not None:
+            low_roi = self._roi[0]
+            high_roi = self._roi[1]
+            mask = mask[:low_roi] = [True] * low_roi
+            mask = mask[high_roi:] = [True] * high_roi
+
         if len(self._data.shape) > 1:
-            mask = np.stack([self._pixels_masked.mask] * self._data.shape[0])
-        else:
-            mask = self._pixels_masked.mask
+            mask = np.stack([mask] * self._data.shape[0])
+
         self._data_masked = np.ma.masked_array(self._data, mask=mask)
 
     @check_data
