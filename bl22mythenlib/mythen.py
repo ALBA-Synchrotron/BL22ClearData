@@ -44,6 +44,14 @@ class DataFitted(object):
         return value
 
 
+def check_data(fn):
+    def fn_wrapper(obj, *args, **kwargs):
+        if obj._data is None:
+            raise RuntimeError('You must set first the raw_data')
+        return fn(obj, *args, **kwargs)
+    return fn_wrapper
+
+
 class Mythen(object):
     """
     Class for the Mythen 1K detector
@@ -54,7 +62,7 @@ class Mythen(object):
     def __init__(self, data=None, dead_pixels=None,
                  disp_func=gauss_function):
         self._dead_pixels = None
-        self._rois = [[0, self.nr_pixels]]
+        self._roi = None
         self._pixels_masked = None
         self._data = None
         self._data_masked = None
@@ -105,24 +113,31 @@ class Mythen(object):
             mask = self._pixels_masked.mask
         self._data_masked = np.ma.masked_array(self._data, mask=mask)
 
-    def add_roi(self, pmin=500, pmax=1100):
+    @check_data
+    def set_roi(self, pmin=500, pmax=1100):
         """
         Add roi do the rois list
         :param pmin: int
         :param pmax: int
         :return: int -> ROI id
         """
+
         if pmin < 1 or pmin > self.nr_pixels or pmax < 1 \
                 or pmax > self.nr_pixels:
             raise ValueError('pmin and pmax should be between '
                              '[1,{0}]'.format(self.nr_pixels))
         pmin = int(min(pmin, pmax))
         pmax = int(max(pmin, pmax))
-        self._rois.append([pmin, pmax])
-        return len(self._rois)
+        self._roi = [pmin, pmax]
+        self.raw_data = self._data
 
-    def get_rois(self):
-        return list(self._rois)
+    def get_roi(self):
+        return self._roi
+
+    @check_data
+    def remove_roi(self):
+        self._roi = None
+        self.raw_data = self._data
 
     def get_data(self, compressed=False, remove_noise=False, clip=False):
         """
