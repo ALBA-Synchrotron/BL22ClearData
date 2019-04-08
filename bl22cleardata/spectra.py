@@ -34,7 +34,7 @@ class Spectra:
         Class to calculate the Spectra
         :param calib_file: json file with the calibration.
         """
-        self.log = logging.getLogger('bl22mythenlib.Spectra')
+        self.log = logging.getLogger('bl22cleardata.Spectra')
         self._calib = Calibration(calib_file)
         self._calib_file = calib_file
         self.spectra = None

@@ -32,7 +32,7 @@ class Calibration:
     """
 
     def __init__(self, calib_file= None):
-        self.log = logging.getLogger('bl22mythenlib.Calibration')
+        self.log = logging.getLogger('bl22cleardata.Calibration')
 
         self.e0 = None
         self.p0 = None

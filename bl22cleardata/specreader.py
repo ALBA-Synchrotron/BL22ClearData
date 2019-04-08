@@ -126,7 +126,7 @@ def read_raw_data_spec(log, file_obj, scan_id):
 
 def read_scan(filename, scan_id, log=None):
     if log is None:
-        log = logging.getLogger('bl22mythenlib.read_scan')
+        log = logging.getLogger('bl22cleardata.read_scan')
     with open(filename, 'r') as f:
         return read_raw_data_spec(log, f, scan_id)
 

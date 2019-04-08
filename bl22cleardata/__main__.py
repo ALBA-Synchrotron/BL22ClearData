@@ -57,7 +57,7 @@ LOGGING_CONFIG = {
             'propagate': True,
             'level': 'INFO',
         },
-        'bl22mythenlib': {
+        'bl22cleardata': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
@@ -159,7 +159,7 @@ def config_loggers(debug):
     log_app.addHandler(log_ch)
 
     # Library
-    log_lib = logging.getLogger('bl22mythenlib')
+    log_lib = logging.getLogger('bl22cleardata')
     log_lib.setLevel(level)
     log_lib.addHandler(log_ch)
 
