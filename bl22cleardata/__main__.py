@@ -165,7 +165,10 @@ def config_loggers(debug):
 
 
 def main():
-    args = get_parser().parse_args()
+    parser = get_parser()
+    args = parser.parse_args()
+    if len(sys.argv) < 2:
+        args = parser.parse_args(['-h'])
     config_loggers(args.debug)
     log = logging.getLogger('app')
 
