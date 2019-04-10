@@ -20,7 +20,7 @@ setup(
     version=__version,
     author='Roberto J. Homs Puron',
     author_email='rhoms@cells.es',
-    url="https://github.com/ALBA-Synchrotron/pyIcePAP",
+    url='',
     packages=find_packages(),
     include_package_data=True,
     license="Python",
@@ -40,7 +40,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'pyclear = bl22cleardata.__main__:main',
+            'pyClear = bl22cleardata.__main__:main',
         ]
     }
 )
