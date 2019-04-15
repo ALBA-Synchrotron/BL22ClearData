@@ -97,6 +97,8 @@ def get_parser():
     calib_cmd.add_argument('scan_id', help='Scan number')
     # TODO: Analyze if there is a way to change it
     calib_cmd.add_argument('output_file', help='Output file name')
+    calib_cmd.add_argument('-d', '--debug', action='store_true',
+                           help='Activate log level DEBUG')
     calib_cmd.add_argument('--noise', default=2.5, type=float,
                            help='Noise percent to be removed')
     calib_cmd.add_argument('--threshold', default=0.7, type=float,
@@ -105,8 +107,10 @@ def get_parser():
                            help='Set ROI e.g --roi=[400,900]')
     calib_cmd.add_argument('--no_auto_roi', action='store_false',
                            help='No use the auto_roi generation')
-    calib_cmd.add_argument('-d', '--debug', action='store_true',
-                           help='Activate log level DEBUG')
+    calib_cmd.add_argument('-p', '--plot', action='store_true',
+                           help='Activate plot showing')
+    calib_cmd.add_argument('--energy_step', default=0.03, type=float,
+                           help='Step of the energy scale.')
 
     # -------------------------------------------------------------------------
     #                           Spectra command
@@ -183,7 +187,9 @@ def main():
                              auto_roi=args.no_auto_roi,
                              user_roi=roi,
                              threshold=args.threshold,
-                             noise_percent=args.noise)
+                             noise_percent=args.noise,
+                             energy_resolution=args.energy_step,
+                             show_plot=args.plot)
 
         except Exception as e:
             log.error('The calibration failed: {}'.format(e))

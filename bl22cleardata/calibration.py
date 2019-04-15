@@ -20,7 +20,9 @@ import logging
 import time
 import numpy as np
 from scipy.optimize import fmin
-from .constants import ENERGY, CBRAGG, CAZ, get_crystal, BAD_PIXEL
+from scipy.interpolate import interp1d
+from matplotlib import pyplot as plt
+from .constants import ENERGY, BAD_PIXEL
 from .specreader import read_scan, get_filename
 from .mathfunc import get_mythen_data, linear_regression, calc_autoroi, \
     dispersion_2d, get_best_fit, gauss_function
@@ -31,7 +33,7 @@ class Calibration:
     Class to store the calibration
     """
 
-    def __init__(self, calib_file= None):
+    def __init__(self, calib_file=None):
         self.log = logging.getLogger('bl22cleardata.Calibration')
 
         self.e0 = None
@@ -52,6 +54,8 @@ class Calibration:
         self.energy_scale = None
         self.scan_resolution = None
         self.scan_sum = None
+        self.m_data = None
+        self.auto_roi = None
 
         if calib_file is not None:
             self.load_from_file(calib_file)
@@ -73,9 +77,9 @@ class Calibration:
             self.roi_low = calib_loaded['roi_low']
             self.roi_high = calib_loaded['roi_high']
             self.cbragg_pos = calib_loaded['cbragg_pos']
-            self.crystal_order = calib_loaded['crystal_order']
-            self.caz_pos = calib_loaded['caz_pos']
-            self.crystal = get_crystal(self.caz_pos)
+            # self.crystal_order = calib_loaded['crystal_order']
+            # self.caz_pos = calib_loaded['caz_pos']
+            # self.crystal = #get_crystal(self.caz_pos)
             self.scan_sum = np.array(calib_loaded['scan_sum'])
             self.scan_resolution = np.array(calib_loaded['scan_resolution'])
             self.energy_scale = np.array(calib_loaded['energy_scale'])
@@ -86,7 +90,7 @@ class Calibration:
             raise RuntimeError('Wrong calibration')
 
     def save_to_file(self, output_file):
-        calib_to_save = {}
+        calib_to_save = dict()
         calib_to_save['date'] = time.strftime('%d/%m/%Y %H:%M:%S')
         calib_to_save['scan_file'] = self.scan_file
         calib_to_save['scan_id'] = self.scan_id
@@ -101,8 +105,8 @@ class Calibration:
         calib_to_save['roi_low'] = self.roi_low
         calib_to_save['roi_high'] = self.roi_high
         calib_to_save['cbragg_pos'] = self.cbragg_pos
-        calib_to_save['crystal_order'] = self.crystal_order
-        calib_to_save['caz_pos'] = self.caz_pos
+        # calib_to_save['crystal_order'] = self.crystal_order
+        # calib_to_save['caz_pos'] = self.caz_pos
         calib_to_save['scan_sum'] = self.scan_sum.tolist()
         calib_to_save['scan_resolution'] = self.scan_resolution.tolist()
         calib_to_save['energy_scale'] = self.energy_scale.tolist()
@@ -123,6 +127,13 @@ class Calibration:
         np.savetxt(plot_filename, plot_data.T, header=header, comments='#')
         self.log.info('Saved calibration plot: {}'.format(plot_filename))
 
+        header = 'Mythen raw data.'
+        mythen_filename = get_filename(output_file, suffix='mythen_data')
+        raw_data = self.m_data
+        np.savetxt(mythen_filename, raw_data, header=header)
+        self.log.info('Saved Mythen normalized '
+                      'data: {}'.format(mythen_filename))
+
     def pixel2energy(self, pixels):
         return self.energy_a * pixels + self.energy_b
 
@@ -130,30 +141,31 @@ class Calibration:
         return (energies - self.energy_b) / self.energy_a
 
     def calibrate(self, scan_file, scan_id, auto_roi=True,
-                  user_roi=[0, BAD_PIXEL], threshold=0.7,
-                  noise_percent=2.5):
+                  user_roi=(0, BAD_PIXEL), threshold=0.7,
+                  noise_percent=2.5, energy_resolution=0.03, show_plot=False):
 
         self.auto_roi = auto_roi
         self.scan_id = scan_id
         self.scan_file = scan_file
-
+        self.log.info('Reading data...')
         data, snapshots = read_scan(self.scan_file, self.scan_id, self.log)
 
         # Get the crystal
-        self.caz_pos = snapshots[CAZ][0]
-        self.crystal = get_crystal(self.caz_pos)
+        # self.caz_pos = snapshots[CAZ][0]
+        # self.crystal = get_crystal(self.caz_pos)
 
         # Calculate the order
         energies = np.array(data[ENERGY])
-        cbragg_pos = snapshots[CBRAGG]
-        self.crystal_order = self.crystal.find_order(energies.mean(),
-                                                     cbragg_pos)
-
+        # cbragg_pos = snapshots[CBRAGG]
+        # self.crystal_order = self.crystal.find_order(energies.mean(),
+        #                                              cbragg_pos)
+        self.log.info('Calculating energy scale...')
         # Calculate a and b for energy scale
         m_data = get_mythen_data(data)
         a, b, x_mean, y_mean, x_std, y_std = linear_regression(m_data,
                                                                threshold)
 
+        self.log.info('Setting ROIs...')
         # Calculate autoROIs
         if self.auto_roi:
             self.roi_low, self.roi_high = calc_autoroi(m_data, noise_percent)
@@ -172,14 +184,15 @@ class Calibration:
         noise = (low_noise + high_noise) / 2
 
         # Calculate 2D dispersion
+        self.log.info('Calculating 2D fitting...')
         m_wn = m_data - noise
         m_wroi = m_wn[:, self.roi_low:self.roi_high]
         d = m_wroi / m_wroi.sum()
 
-        X, Y = np.meshgrid(np.arange(m_wroi.shape[1]),
+        x, y = np.meshgrid(np.arange(m_wroi.shape[1]),
                            np.arange(m_wroi.shape[0]))
         cost = lambda v: ((dispersion_2d(a, x_mean, y_mean,
-                                         x_std, y_std, X, Y) - d) ** 2).sum()
+                                         x_std, y_std, x, y) - d) ** 2).sum()
         new_a, new_x_mean, new_y_mean, new_x_std, new_y_std = \
             fmin(cost, [a, x_mean, y_mean, x_std, y_std])
 
@@ -201,6 +214,7 @@ class Calibration:
         self.energy_a = self.k * self.a
         self.energy_b = self.k * self.b + energies[0]
 
+        self.log.info('Calculating p0 and e0...')
         # Calculate p0 and e0
         x = np.arange(m_wroi.shape[1])
         disp_exp = m_wroi.max(axis=0)
@@ -211,29 +225,70 @@ class Calibration:
         # Calculate energy scale vector
         self.scan_sum = m_wn.sum(axis=0)
 
-        # Calculate the resolution. All peaks must be on the same position.
-        p0_e = self.energy2pixel(energies).astype(int)
-        p0_delta = p0_e - self.p0
-        pixel_scale = np.array(range(BAD_PIXEL))
-        scan_resolution = np.zeros(pixel_scale.shape[0])
-        for p0_d, i in zip(p0_delta, m_wn):
-            min_pixel = abs(p0_d)
-            max_pixel = BAD_PIXEL - min_pixel
-            if p0_d > 0:
-                scan_resolution[0:max_pixel] = \
-                    scan_resolution[0:max_pixel] + i[min_pixel:BAD_PIXEL]
-            else:
-                scan_resolution[min_pixel: BAD_PIXEL] = \
-                    scan_resolution[min_pixel: BAD_PIXEL] + i[0: max_pixel]
+        self.log.info('Calculating resolution...')
 
-        self.energy_scale = self.pixel2energy(pixel_scale)
-        self.scan_resolution = scan_resolution
+        # Calculate the resolution. All peaks must be on the same position.
+        # Use a interpolation of each image and calculate the resolution
+        # according to the energy resolution.
+        # To calculate the resolution we use the stadistic sum:
+        #
+        #    Y = sum( Yi/sigma_i^2) / sum(1/sigma_i^2)
+        #    Yi: intensity vector (Mythen line)
+        #
+        # In this case -> sigma_i = sqrt(Yi) and the Y is:
+        #       Y = nr/ sum(1/Yi)
+        #       nr: number of images
+        # Define Ysum = sum(1/Yi)
+        #       Y = nr / Ysum
+        # The error: S = 1/sqrt(sum(1/sigma_i^2))
+        #       S = 1/sqrt(Ysum)
+        # This method is not applicable to the calibration.
+
+        min_scale = self.pixel2energy(self.roi_low)
+        max_scale = self.pixel2energy(self.roi_high)
+
+        discrete_energy_scale = self.pixel2energy(range(0, BAD_PIXEL))
+        energy_step = int(abs((max_scale - min_scale)/energy_resolution))
+        continue_energy_scale = np.linspace(min_scale, max_scale, energy_step)
+        nr_points = m_data.shape[0]
+        resolution_matrix = np.zeros([nr_points, energy_step])
+        f = interp1d(discrete_energy_scale, m_wn.sum(axis=0),
+                     bounds_error=False, fill_value=0)
+        self.scan_sum = f(continue_energy_scale)
+        for idx, i in enumerate(m_data):
+            e0_delta = self.pixel2energy(m_data[idx].argmax()) - self.e0
+            f = interp1d(discrete_energy_scale - e0_delta, i,
+                         bounds_error=False, fill_value=0)
+            resolution_matrix[idx] = f(continue_energy_scale)
+        self.scan_resolution = resolution_matrix.sum(axis=0) / nr_points
+        self.energy_scale = continue_energy_scale
+        self.m_data = m_data
+
+        if show_plot:
+            # TODO: Evaluate if to use thread to not block
+            fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+            axs[0, 0].imshow(m_wn[:, self.roi_low:self.roi_high])
+            axs[0, 1].imshow(resolution_matrix)
+            for i in resolution_matrix:
+                axs[1, 0].plot(self.energy_scale, i)
+            color = 'tab:red'
+            axs1 = axs[1, 1]
+            axs1.tick_params(axis='y', labelcolor=color)
+            axs1.plot(self.energy_scale, self.scan_resolution,
+                      color=color)
+
+            color = 'tab:blue'
+            axs2 = axs[1, 1].twinx()
+            axs2.tick_params(axis='y', labelcolor=color)
+            axs2.plot(self.energy_scale, self.scan_sum, color=color)
+            plt.show()
 
 
 def main(scan_file, scan_id, output_file, auto_roi=True,
-         user_roi=[0, BAD_PIXEL], threshold=0.7, noise_percent=2.5):
+         user_roi=(0, BAD_PIXEL), threshold=0.7, noise_percent=2.5,
+         energy_resolution=0.03, show_plot=False):
 
-        calib = Calibration()
-        calib.calibrate(scan_file, scan_id, auto_roi, user_roi, threshold,
-                        noise_percent)
-        calib.save_to_file(output_file)
+    calib = Calibration()
+    calib.calibrate(scan_file, scan_id, auto_roi, user_roi, threshold,
+                    noise_percent, energy_resolution, show_plot)
+    calib.save_to_file(output_file)
