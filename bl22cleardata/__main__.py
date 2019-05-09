@@ -127,6 +127,10 @@ def get_parser():
     spectra_cmd.add_argument('output_file', help='Output file name')
     spectra_cmd.add_argument('-d', '--debug', action='store_true',
                              help='Activate log level DEBUG')
+    spectra_cmd.add_argument('-p', '--plot', action='store_true',
+                             help='Activate plot showing')
+    spectra_cmd.add_argument('--extract_raw', action='store_true',
+                             help='Extract mythen raw data normalized by I0')
 
     # -------------------------------------------------------------------------
     #                           IcePAP commands
@@ -205,7 +209,10 @@ def main():
             spectra_main(scan_file=args.scan_file,
                          scan_id=args.scan_id,
                          calib_file=args.calib_file,
-                         output_file=args.output_file)
+                         output_file=args.output_file,
+                         show_plot=args.plot,
+                         extract_raw=args.extract_raw)
+
         except Exception as e:
             log.error('The spectra calculation failed: {}'.format(e))
             end(log, -1)
