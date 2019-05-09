@@ -111,6 +111,8 @@ def get_parser():
                            help='Activate plot showing')
     calib_cmd.add_argument('--energy_step', default=0.03, type=float,
                            help='Step of the energy scale.')
+    calib_cmd.add_argument('--extract_raw', action='store_true',
+                           help='Extract mythen raw data normalized by I0')
 
     # -------------------------------------------------------------------------
     #                           Spectra command
@@ -189,7 +191,8 @@ def main():
                              threshold=args.threshold,
                              noise_percent=args.noise,
                              energy_resolution=args.energy_step,
-                             show_plot=args.plot)
+                             show_plot=args.plot,
+                             extract_raw=args.extract_raw)
 
         except Exception as e:
             log.error('The calibration failed: {}'.format(e))
