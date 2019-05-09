@@ -135,11 +135,11 @@ def calc_autoroi(m_data, noise_percent=2.5):
     m_roi_x = m_norm.sum(axis=0)
 
     # Reduce noise
-    noise_level = m_roi_x.max() * noise_percent / 100
+    noise_level = m_roi_x.max() * (noise_percent / 100)
     m_roi_x_clipped = m_roi_x.clip(min=noise_level)
     diff_m_roi = np.diff(np.diff(m_roi_x_clipped))
     diff_norm = normalize(diff_m_roi)
-    r = np.where(diff_norm != diff_norm.mean())[0]
+    r = np.where(diff_norm > diff_norm.mean()+1e-4)[0]
     auto_roi_low = int(r[0])
     auto_roi_high = int(r[-1])
 
