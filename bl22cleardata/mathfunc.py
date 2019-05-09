@@ -146,6 +146,15 @@ def calc_autoroi(m_data, noise_percent=2.5):
     return auto_roi_low, auto_roi_high
 
 
+def get_center_of_mass(x, y):
+    n = (x * y).sum(axis=1)
+    n[n == 0] = np.nan
+    d = y.sum(axis=1)
+    d[d == 0] = np.nan
+    cm = n/d
+    return cm
+
+
 def dispersion_2d(a, x0, y0, alpha, beta, X, Y):
     XX = X - x0
     YY = Y - y0
