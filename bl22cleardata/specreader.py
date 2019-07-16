@@ -3,8 +3,7 @@
 # -----------------------------------------------------------------------------
 # This file is part of BL22 Mythen Post Processing ()
 #
-# Author(s): Dominique Heinis <dheinis@cells.es>,
-#            Roberto J. Homs Puron <rhoms@cells.es>
+# Author(s): Roberto J. Homs Puron <rhoms@cells.es>
 #
 # Copyright 2008 CELLS / ALBA Synchrotron, Bellaterra, Spain
 #
