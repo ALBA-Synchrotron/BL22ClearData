@@ -16,7 +16,7 @@
 # along with the software. If not, see <http://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-from crystal import CrystalGe, CrystalSi
+#from crystal import CrystalGe, CrystalSi
 
 
 # Beamline Channels names
@@ -34,7 +34,8 @@ BAD_PIXEL = 1140
 
 # Analyzer selector
 def get_crystal(caz_pos):
-    return CrystalSi([1, 1, 1])
+    return 1
+    #return CrystalSi([1, 1, 1])
     # TODO: Implement selection by position
     # if -183 < caz_pos < -180:
     #     return CrystalSi([1, 1, 1])
