@@ -23,8 +23,8 @@ from matplotlib import pyplot as plt
 from multiprocessing import Process
 from .calibration import Calibration
 from .constants import CEOUT, BAD_PIXEL
-from .mathfunc import get_mythen_data, normalize
-from .specreader import read_scan, get_filename
+from .tool import get_mythen_data, normalize, save_mythen_raw, save_plot
+from .specreader import read_scan
 
 
 class Spectra:
@@ -206,8 +206,6 @@ class Spectra:
             p.start()
 
     def save_to_file(self, output_file, extract_raw=False):
-        plot_filename = get_filename(output_file, suffix='plot')
-        plot_data = np.array([self.energy_scale, self.spectra])
 
         # TODO: Introduced the scan 0 to do not crash pyMCA. Remove when it
         #  does not fail
@@ -218,15 +216,11 @@ class Spectra:
                  'C Scan ID: {}\n'.format(self._scan_id) + \
                  'N 2\n' \
                  'L  energy  spectra'
-        np.savetxt(plot_filename, plot_data.T, header=header, comments='#')
-        self.log.info('Saved spectra plot: {}'.format(plot_filename))
+        data = np.array([self.energy_scale, self.spectra])
+        save_plot(output_file, data, header, log=self.log)
+
         if extract_raw:
-            header = 'Mythen raw data.'
-            mythen_filename = get_filename(output_file, suffix='mythen_data')
-            raw_data = self.m_data
-            np.savetxt(mythen_filename, raw_data, header=header)
-            self.log.info('Saved Mythen normalized '
-                          'data: {}'.format(mythen_filename))
+            save_mythen_raw(output_file, self.m_data, log=self.log)
 
 
 def main(scan_file, scan_id, calib_file, output_file, show_plot=False,

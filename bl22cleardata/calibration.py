@@ -24,9 +24,10 @@ from scipy.interpolate import interp1d
 from multiprocessing import Process
 from matplotlib import pyplot as plt
 from .constants import ENERGY, BAD_PIXEL
-from .specreader import read_scan, get_filename
-from .mathfunc import get_mythen_data, linear_regression, calc_autoroi, \
-    dispersion_2d, get_best_fit, gauss_function
+from .specreader import read_scan
+from .tool import get_mythen_data, linear_regression, calc_autoroi, \
+    dispersion_2d, get_best_fit, gauss_function, save_mythen_raw, save_plot, \
+    get_filename
 
 
 class Calibration:
@@ -123,9 +124,6 @@ class Calibration:
         with open(calib_filename, 'w') as f:
             json.dump(calib_to_save, f, indent=0)
         self.log.info('Calibration saved.')
-        plot_filename = get_filename(output_file, suffix='plot')
-        plot_data = np.array([self.m_energy_scale, self.m_calib,
-                              self.m_resolution])
         # TODO: Introduced the scan 0 to do not crash pyMCA. Remove when it
         #  does not fail
         header = 'S 0 No Data\n' \
@@ -133,15 +131,10 @@ class Calibration:
                  'C Calibration file {}\n'.format(calib_filename) + \
                  'N 2\n' \
                  'L  energy  calibration  resolution'
-        np.savetxt(plot_filename, plot_data.T, header=header, comments='#')
-        self.log.info('Saved calibration plot: {}'.format(plot_filename))
+        data = np.array([self.m_energy_scale, self.m_calib, self.m_resolution])
+        save_plot(output_file, data, header, log=self.log)
         if extract_raw:
-            header = 'Mythen raw data.'
-            mythen_filename = get_filename(output_file, suffix='mythen_data')
-            raw_data = self.m_data
-            np.savetxt(mythen_filename, raw_data, header=header)
-            self.log.info('Saved Mythen normalized '
-                          'data: {}'.format(mythen_filename))
+            save_mythen_raw(output_file, self.m_data, log=self.log)
 
     def pixel2energy(self, pixels):
         return self.energy_a * pixels + self.energy_b
