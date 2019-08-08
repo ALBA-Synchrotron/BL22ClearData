@@ -16,6 +16,7 @@
 # along with the software. If not, see <http://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
+import os
 import numpy as np
 from scipy.optimize import curve_fit
 from .constants import M_RAW, IO, BAD_PIXEL
@@ -186,3 +187,31 @@ def get_best_fit(x, y, func):
 def gauss_function(x, a, x0, sigma):
     sigma = max(sigma, 1)
     return a*np.exp(-(x-x0)*(x-x0)/(2*sigma**2))
+
+
+def get_filename(filename, suffix='out', len_auto_index=3):
+    fname, fext = os.path.splitext(filename)
+    auto_index = 0
+    while len_auto_index > 0:
+        filename = '{0}_{1}_{2:0{3}d}{4}'.format(fname, suffix, auto_index,
+                                                 len_auto_index, fext)
+        if not os.path.exists(filename):
+            break
+        auto_index += 1
+
+    return filename
+
+
+def save_plot(output_file, data, header, comments='#', log=None):
+    plot_filename = get_filename(output_file, suffix='plot')
+    np.savetxt(plot_filename, data.T, header=header, comments=comments)
+    if log is not None:
+        log.info('Saved spectra plot: {}'.format(plot_filename))
+
+
+def save_mythen_raw(output_file, mythen_raw, log=None):
+    header = 'Mythen raw data.'
+    mythen_filename = get_filename(output_file, suffix='mythen_data')
+    np.savetxt(mythen_filename, mythen_raw, header=header)
+    if log is not None:
+        log.info('Saved Mythen normalized data: {}'.format(mythen_filename))

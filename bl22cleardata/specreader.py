@@ -16,20 +16,6 @@
 # -----------------------------------------------------------------------------
 
 import logging
-import os
-
-
-def get_filename(filename, suffix='out', len_auto_index=3):
-    fname, fext = os.path.splitext(filename)
-    auto_index = 0
-    while len_auto_index > 0:
-        filename = '{0}_{1}_{2:0{3}d}{4}'.format(fname, suffix, auto_index,
-                                                 len_auto_index, fext)
-        if not os.path.exists(filename):
-            break
-        auto_index += 1
-
-    return filename
 
 
 def read_raw_data_spec(log, file_obj, scan_id):
