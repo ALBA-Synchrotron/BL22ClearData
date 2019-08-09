@@ -206,7 +206,7 @@ def save_plot(output_file, data, header, comments='#', log=None):
     plot_filename = get_filename(output_file, suffix='plot')
     np.savetxt(plot_filename, data.T, header=header, comments=comments)
     if log is not None:
-        log.info('Saved spectra plot: {}'.format(plot_filename))
+        log.info('Saved plot: {}'.format(plot_filename))
 
 
 def save_mythen_raw(output_file, mythen_raw, log=None):

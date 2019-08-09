@@ -21,9 +21,10 @@ import argparse
 import logging
 import logging.config
 from .__init__ import version
-from .calibration import main as calibration_main
 from .constants import BAD_PIXEL
+from .calibration import main as calibration_main
 from .spectra import main as spectra_main
+from .pfy import main as pfy_main
 
 LOGGING_CONFIG = {
     'version': 1,
@@ -131,22 +132,31 @@ def get_parser():
                              help='Activate plot showing')
     spectra_cmd.add_argument('--extract_raw', action='store_true',
                              help='Extract mythen raw data normalized by I0')
+    # -------------------------------------------------------------------------
+    #                           PFY command
+    # -------------------------------------------------------------------------
+    pfy_cmd = subps.add_parser('pfy', help='Generate the ceout pfy plot')
+    pfy_cmd.set_defaults(which='pfy')
+    pfy_cmd.add_argument('scan_file', help='Spec file with the scans')
+    pfy_cmd.add_argument('start_scan_id', help='Scan number of the first scan')
+    pfy_cmd.add_argument('nr_scans', type=int,
+                         help='Number of scan to concatenate')
+    pfy_cmd.add_argument('calib_file', help='Calibration json file')
+    # TODO: Analyze if there is a way to change it
+    pfy_cmd.add_argument('output_file', help='Output file name')
+    pfy_cmd.add_argument('-d', '--debug', action='store_true',
+                         help='Activate log level DEBUG')
+    pfy_cmd.add_argument('-p', '--plot', action='store_true',
+                         help='Activate plot showing')
+    pfy_cmd.add_argument('--extract_raw', action='store_true',
+                         help='Extract mythen raw data normalized by I0')
+    pfy_cmd.add_argument('--extract_json', action='store_true',
+                         help='Extract post process data')
+    pfy_cmd.add_argument('--roi', default='[None, None]',
+                         help='Set ROI in energy scale e.g --roi=[7800,8000]')
 
-    # -------------------------------------------------------------------------
-    #                           IcePAP commands
-    # -------------------------------------------------------------------------
     return parse
 
-
-# def get_filename(host, command, filename='', log=False):
-#     value = time.strftime('%Y%m%d_%H%m%S')
-#     ext = ['cfg', 'log'][log]
-#     if host == '':
-#         host = 'icepap'
-#     new_filename = '{0}_{1}_{2}.{3}'.format(value, host, command, ext)
-#     if log or filename == '':
-#         filename = new_filename
-#     return os.path.abspath(filename)
 
 def config_loggers(debug):
     verbose = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -212,6 +222,25 @@ def main():
                          output_file=args.output_file,
                          show_plot=args.plot,
                          extract_raw=args.extract_raw)
+
+        except Exception as e:
+            log.error('The spectra calculation failed: {}'.format(e))
+            end(log, -1)
+
+    # PFY Command
+    if args.which == 'pfy':
+        log.info('Running PFY calculation...')
+        try:
+            pfy_main(scan_file=args.scan_file,
+                     start_scan_id=args.start_scan_id,
+                     nr_scans=args.nr_scans,
+                     calib_file=args.calib_file,
+                     output_file=args.output_file,
+                     show_plot=args.plot,
+                     extract_raw=args.extract_raw,
+                     extract_post_process=args.extract_json,
+                     user_roi=args.roi
+                     )
 
         except Exception as e:
             log.error('The spectra calculation failed: {}'.format(e))
