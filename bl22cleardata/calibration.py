@@ -144,7 +144,7 @@ class Calibration:
 
     def calibrate(self, scan_file, scan_id, auto_roi=True,
                   user_roi=(0, BAD_PIXEL), threshold=0.7,
-                  noise_percent=2.5, energy_resolution=0.03, show_plot=False):
+                  noise_percent=10, energy_resolution=0.03, show_plot=False):
 
         self.auto_roi = auto_roi
         self.scan_id = scan_id

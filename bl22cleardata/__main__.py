@@ -99,7 +99,7 @@ def get_parser():
     calib_cmd.add_argument('output_file', help='Output file name')
     calib_cmd.add_argument('-d', '--debug', action='store_true',
                            help='Activate log level DEBUG')
-    calib_cmd.add_argument('--noise', default=2.5, type=float,
+    calib_cmd.add_argument('--noise', default=10, type=float,
                            help='Noise percent to be removed')
     calib_cmd.add_argument('--threshold', default=0.7, type=float,
                            help='Threshold level [0, 1] use on the fit')
