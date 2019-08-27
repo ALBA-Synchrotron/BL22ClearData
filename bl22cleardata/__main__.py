@@ -118,7 +118,8 @@ def get_parser():
 
 def config_loggers(debug):
     verbose = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    simple = '%(levelname)-8s %(message)s'
+    #simple = '%(levelname)-8s %(message)s'
+    simple = '%(message)s'
 
     log_ch = logging.StreamHandler(sys.stdout)
     if debug:
@@ -149,6 +150,7 @@ def main():
         args = parser.parse_args(['-h'])
     config_loggers(args.debug)
     log = logging.getLogger('app')
+    log.info('Library Version: {}'.format(version))
 
     # Calibration Command
     if args.which == 'calib':
