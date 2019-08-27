@@ -26,50 +26,8 @@ from .calibration import main as calibration_main
 from .spectra import main as spectra_main
 from .pfy import main as pfy_main
 
-LOGGING_CONFIG = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'verbose': {
-            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        },
-        'simple': {
-            'format': '%(levelname)-8s %(message)s'
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple'
-        },
-        # 'file': {
-        #     'level': 'INFO',
-        #     'class': 'logging.FileHandler',
-        #     'filename': '',
-        #     'mode': 'w',
-        #     'encoding': 'utf-8',
-        #     'formatter': 'verbose'
-        # }
-    },
-    'loggers': {
-        'Application': {
-            'handlers': ['console'],
-            'propagate': True,
-            'level': 'INFO',
-        },
-        'bl22cleardata': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
-        }
-    }
-}
-
 
 def end(log, err_no=0):
-    # log_file = LOGGING_CONFIG['handlers']['file']['filename']
-    # log.info('Log saved on: {0}'.format(log_file))
     for h in log.handlers:
         h.flush()
     sys.exit(err_no)
