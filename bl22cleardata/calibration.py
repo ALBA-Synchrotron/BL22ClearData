@@ -117,7 +117,7 @@ class Calibration:
         calib_to_save['mythen_calibration'] = self.m_calib.tolist()
         # calib_to_save['mythen_resolution'] = self.m_resolution.tolist()
         calib_to_save['mythen_energy_scale'] = self.m_energy_scale.tolist()
-        calib_filename = get_filename(output_file, suffix='json')
+        calib_filename = get_filename(output_file, suffix='data', fext='.json')
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug('Calibration {}'.format(calib_to_save))
         self.log.info('Saving calibration to: {}'.format(calib_filename))

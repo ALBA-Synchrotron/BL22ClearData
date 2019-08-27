@@ -189,8 +189,8 @@ def gauss_function(x, a, x0, sigma):
     return a*np.exp(-(x-x0)*(x-x0)/(2*sigma**2))
 
 
-def get_filename(filename, suffix='out', len_auto_index=3):
-    fname, fext = os.path.splitext(filename)
+def get_filename(filename, suffix='out', fext='.txt', len_auto_index=3):
+    fname, _ = os.path.splitext(filename)
     auto_index = 0
     while len_auto_index > 0:
         filename = '{0}_{1}_{2:0{3}d}{4}'.format(fname, suffix, auto_index,
