@@ -120,7 +120,7 @@ def config_loggers(debug):
     verbose = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     simple = '%(levelname)-8s %(message)s'
 
-    log_ch = logging.StreamHandler()
+    log_ch = logging.StreamHandler(sys.stdout)
     if debug:
         level = logging.DEBUG
         fmt = logging.Formatter(verbose)
