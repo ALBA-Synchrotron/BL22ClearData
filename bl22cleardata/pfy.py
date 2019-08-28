@@ -39,7 +39,7 @@ class PFY:
         Class to calculate the Spectra
         :param calib_file: json file with the calibration.
         """
-        self.log = logging.getLogger('bl22cleardata.Spectra')
+        self.log = logging.getLogger('bl22cleardata.PFY')
         self._calib = Calibration(calib_file)
         self._calib_file = calib_file
         self._scan_file = None
@@ -202,19 +202,20 @@ class PFY:
 
         # TODO: Introduced the scan 0 to do not crash pyMCA. Remove when it
         #  does not fail
+        start_scan_id = self._start_scan_id
+        end_scan_id = self._start_scan_id + self._nr_scans
         header = 'S 0 No Data\n' \
-                 'S 1 Spectra plot ScanID: {}\n'.format(self._scan_id) + \
+                 'S 1 PFY plot ScanIDs: ' \
+                 '{} - {}\n'.format(start_scan_id, end_scan_id) + \
                  'C Calibration file: {}\n'.format(self._calib_file) + \
                  'C Scan file: {}\n'.format(self._scan_file) + \
-                 'C Start Scan ID: {}\n'.format(self._start_scan_id) + \
-                 'C Number of Scans: {}\n'.format(self._nr_scans) + \
                  'C Energy ROI Low: {}\n'.format(self.energy_roi_low) + \
                  'C Energy ROI High: {}\n'.format(self.energy_roi_high) + \
                  'N 2\n' \
                  'L  energy  pfy'
 
         data = np.array([self.energy_scale, self.pfy])
-        save_plot(output_file, data, header, log=self.log,)
+        save_plot(output_file, data, header, log=self.log)
 
         if extract_raw:
             save_mythen_raw(output_file, self.m_data, log=self.log)
@@ -236,8 +237,9 @@ class PFY:
 def main(scan_file, start_scan_id, nr_scans, calib_file, output_file,
          show_plot=False, extract_raw=False, extract_post_process=False,
          user_roi=[None, None]):
+    user_roi_low = user_roi[0]
+    user_roi_high = user_roi[1]
 
-    user_roi_low, user_roi_high = user_roi
     pfy = PFY(calib_file)
     pfy.calc_pfy(scan_file, start_scan_id, nr_scans, user_roi_low=user_roi_low,
                  user_roi_high=user_roi_high, show_plot=show_plot)

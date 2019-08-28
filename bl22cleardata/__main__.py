@@ -96,7 +96,8 @@ def get_parser():
     pfy_cmd = subps.add_parser('pfy', help='Generate the ceout pfy plot')
     pfy_cmd.set_defaults(which='pfy')
     pfy_cmd.add_argument('scan_file', help='Spec file with the scans')
-    pfy_cmd.add_argument('start_scan_id', help='Scan number of the first scan')
+    pfy_cmd.add_argument('start_scan_id', type=int,
+                         help='Scan number of the first scan',)
     pfy_cmd.add_argument('nr_scans', type=int,
                          help='Number of scan to concatenate')
     pfy_cmd.add_argument('calib_file', help='Calibration json file')
@@ -191,6 +192,7 @@ def main():
     if args.which == 'pfy':
         log.info('Running PFY calculation...')
         try:
+            roi = eval(args.roi)
             pfy_main(scan_file=args.scan_file,
                      start_scan_id=args.start_scan_id,
                      nr_scans=args.nr_scans,
@@ -199,7 +201,7 @@ def main():
                      show_plot=args.plot,
                      extract_raw=args.extract_raw,
                      extract_post_process=args.extract_json,
-                     user_roi=args.roi
+                     user_roi=roi
                      )
 
         except Exception as e:
