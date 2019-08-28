@@ -80,6 +80,9 @@ class PFY:
     def calc_pfy(self, scan_file, start_scan_id, nr_scans, user_roi_high=None,
                  user_roi_low=None, show_plot=False):
         self._scan_file = scan_file
+        if nr_scans < 0:
+            start_scan_id = start_scan_id + nr_scans + 1
+            nr_scans *= -1
         self._start_scan_id = start_scan_id
         self._nr_scans = nr_scans
 

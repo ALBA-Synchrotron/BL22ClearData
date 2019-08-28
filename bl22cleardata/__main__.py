@@ -97,9 +97,10 @@ def get_parser():
     pfy_cmd.set_defaults(which='pfy')
     pfy_cmd.add_argument('scan_file', help='Spec file with the scans')
     pfy_cmd.add_argument('start_scan_id', type=int,
-                         help='Scan number of the first scan',)
+                         help='Scan number of the first or last scan',)
     pfy_cmd.add_argument('nr_scans', type=int,
-                         help='Number of scan to concatenate')
+                         help='Number of scan to concatenate, can be a '
+                              'negative value')
     pfy_cmd.add_argument('calib_file', help='Calibration json file')
     # TODO: Analyze if there is a way to change it
     pfy_cmd.add_argument('output_file', help='Output file name')
