@@ -226,10 +226,10 @@ class PFY:
         if extract_post_process:
             data = dict()
             data['output_file'] = output_file
-            data['energy_scale'] = self.energy_scale.lolist()
+            data['energy_scale'] = self.energy_scale.tolist()
             data['mythen_energy_scale'] = self.mythen_energy_scale.tolist()
             data['data_processed'] = self.intensity_matrix.tolist()
-            json_file = get_filename(output_file, suffix='json')
+            json_file = get_filename(output_file, suffix='data', fext='.json')
             self.log.info('Saving data processed to: '
                           '{}'.format(json_file))
             with open(json_file, 'w') as f:
