@@ -60,6 +60,7 @@ class Calibration:
         self.auto_roi = None
         self.noise_percent = None
         self.energy_resolution = None
+        self.i0_name = None
 
         if calib_file is not None:
             self.load_from_file(calib_file)
@@ -89,6 +90,7 @@ class Calibration:
             self.m_energy_scale = np.array(calib_loaded['mythen_energy_scale'])
             self.energy_resolution = calib_loaded['energy_resolution']
             self.noise_percent = calib_loaded['noise_percent']
+            self.i0_name = calib_loaded['i0_name']
         except Exception as e:
             self.log.error('Error on load calibration from '
                            'file: {}'.format(e))
@@ -99,6 +101,7 @@ class Calibration:
         calib_to_save['date'] = time.strftime('%d/%m/%Y %H:%M:%S')
         calib_to_save['scan_file'] = self.scan_file
         calib_to_save['scan_id'] = self.scan_id
+        calib_to_save['i0_name'] = self.i0_name
         calib_to_save['e0'] = self.e0
         calib_to_save['p0'] = self.p0
         calib_to_save['a'] = self.a
@@ -144,8 +147,10 @@ class Calibration:
 
     def calibrate(self, scan_file, scan_id, auto_roi=True,
                   user_roi=(0, BAD_PIXEL), threshold=0.7,
-                  noise_percent=10, energy_resolution=0.03, show_plot=False):
+                  noise_percent=10, energy_resolution=0.03, show_plot=False,
+                  i0_name='n_i0_1'):
 
+        self.i0_name = i0_name
         self.auto_roi = auto_roi
         self.scan_id = scan_id
         self.scan_file = scan_file
@@ -153,7 +158,6 @@ class Calibration:
         self.noise_percent = noise_percent
         self.log.info('Reading data...')
         data, snapshots = read_scan(self.scan_file, self.scan_id, self.log)
-
         # Get the crystal
         # self.caz_pos = snapshots[CAZ][0]
         # self.crystal = get_crystal(self.caz_pos)
@@ -165,7 +169,7 @@ class Calibration:
         #                                              cbragg_pos)
         self.log.info('Calculating energy scale...')
         # Calculate a and b for energy scale
-        m_data = get_mythen_data(data)
+        m_data = get_mythen_data(data, self.i0_name)
         a, b, x_mean, y_mean, x_std, y_std = linear_regression(m_data,
                                                                threshold)
 
@@ -294,9 +298,10 @@ class Calibration:
 
 def main(scan_file, scan_id, output_file, auto_roi=True,
          user_roi=(0, BAD_PIXEL), threshold=0.7, noise_percent=2.5,
-         energy_resolution=0.03, show_plot=False, extract_raw=False):
+         energy_resolution=0.03, show_plot=False, extract_raw=False,
+         i0_name='n_i0_1'):
 
     calib = Calibration()
     calib.calibrate(scan_file, scan_id, auto_roi, user_roi, threshold,
-                    noise_percent, energy_resolution, show_plot)
+                    noise_percent, energy_resolution, show_plot, i0_name)
     calib.save_to_file(output_file, extract_raw=extract_raw)

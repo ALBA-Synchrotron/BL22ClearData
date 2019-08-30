@@ -63,8 +63,7 @@ class PFY:
                                                  scan_id)
             self.log.info('Reading scan {} from {}'.format(scan_id,
                                                            self._scan_file))
-
-            m_sub_data = get_mythen_data(scan_data)
+            m_sub_data = get_mythen_data(scan_data, self._calib.i0_name)
             energy_sub_data = scan_data[ENERGY]
             if i == 0:
                 m_data = m_sub_data

@@ -22,7 +22,7 @@ from scipy.optimize import curve_fit
 from .constants import M_RAW, IO, BAD_PIXEL
 
 
-def get_mythen_data(data):
+def get_mythen_data(data, i0_name):
     """
     Method to extract the Mythen data from the raw data. It normalizes the
     Mythen data by the I0 and remove the bad channels.
@@ -33,7 +33,7 @@ def get_mythen_data(data):
     """
 
     m_raw = np.array(data[M_RAW])
-    i0 = np.array(data[IO])
+    i0 = np.array(data[i0_name])
 
     # Remove bad pixels
     m_raw = m_raw[:, range(BAD_PIXEL)]

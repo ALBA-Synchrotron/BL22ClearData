@@ -72,6 +72,8 @@ def get_parser():
                            help='Step of the energy scale.')
     calib_cmd.add_argument('--extract_raw', action='store_true',
                            help='Extract mythen raw data normalized by I0')
+    calib_cmd.add_argument('--i0', default='n_i0_1',
+                           help='Channel name used as IO')
 
     # -------------------------------------------------------------------------
     #                           Spectra command
@@ -90,6 +92,7 @@ def get_parser():
                              help='Activate plot showing')
     spectra_cmd.add_argument('--extract_raw', action='store_true',
                              help='Extract mythen raw data normalized by I0')
+
     # -------------------------------------------------------------------------
     #                           PFY command
     # -------------------------------------------------------------------------
@@ -168,7 +171,8 @@ def main():
                              noise_percent=args.noise,
                              energy_resolution=args.energy_step,
                              show_plot=args.plot,
-                             extract_raw=args.extract_raw)
+                             extract_raw=args.extract_raw,
+                             i0_name=args.i0)
 
         except Exception as e:
             log.error('The calibration failed: {}'.format(e))

@@ -51,7 +51,7 @@ class Spectra:
         self._scan_id = scan_id
         self.log.info('Reading scan {} from {}'.format(scan_id, scan_file))
         scan_data, scan_snapshot = read_scan(scan_file, scan_id)
-        m_data = get_mythen_data(scan_data)
+        m_data = get_mythen_data(scan_data, self._calib.i0_name)
         self.m_data = m_data
 
         # Calculate the continue energy scale

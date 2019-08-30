@@ -22,7 +22,6 @@
 # Beamline Channels names
 M_RAW = 'm_raw'
 ENERGY = 'energyc'
-IO = 'n_i0_1'
 CBRAGG = 'clear_bragg'
 CEOUT = 'ceout'
 CAZ = 'caz'
