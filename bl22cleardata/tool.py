@@ -19,7 +19,7 @@
 import os
 import numpy as np
 from scipy.optimize import curve_fit
-from .constants import M_RAW, IO, BAD_PIXEL
+from .constants import M_RAW, BAD_PIXEL
 
 
 def get_mythen_data(data, i0_name):
