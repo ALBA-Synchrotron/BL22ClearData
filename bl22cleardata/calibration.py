@@ -21,6 +21,7 @@ import time
 import numpy as np
 from scipy.optimize import fmin
 from scipy.interpolate import interp1d
+from scipy.signal import savgol_filter
 from multiprocessing import Process
 from matplotlib import pyplot as plt
 from .constants import ENERGY, BAD_PIXEL
@@ -148,7 +149,8 @@ class Calibration:
     def calibrate(self, scan_file, scan_id, auto_roi=True,
                   user_roi=(0, BAD_PIXEL), threshold=0.7,
                   noise_percent=10, energy_resolution=0.03, show_plot=False,
-                  i0_name='n_i0_1'):
+                  i0_name='n_i0_1', smooth_on=True, smooth_window=51,
+                  smooth_order=3):
 
         self.i0_name = i0_name
         self.auto_roi = auto_roi
@@ -262,7 +264,15 @@ class Calibration:
         resolution_matrix = np.zeros([nr_points, energy_step])
         f = interp1d(discrete_energy_scale, m_wn.sum(axis=0),
                      bounds_error=False, fill_value=0)
+
+        # Calculate the calibration vector
         self.m_calib = f(continue_energy_scale)
+        # Apply smoothing to the calibration
+        if smooth_on:
+            self.m_calib = savgol_filter(self.m_calib, smooth_window,
+                                         smooth_order)
+
+        # Calculate the resolution
         for idx, i in enumerate(m_data):
             e0_delta = self.pixel2energy(m_data[idx].argmax()) - self.e0
             f = interp1d(discrete_energy_scale - e0_delta, i,
@@ -299,9 +309,10 @@ class Calibration:
 def main(scan_file, scan_id, output_file, auto_roi=True,
          user_roi=(0, BAD_PIXEL), threshold=0.7, noise_percent=2.5,
          energy_resolution=0.03, show_plot=False, extract_raw=False,
-         i0_name='n_i0_1'):
+         i0_name='n_i0_1', smooth_on=True, smooth_window=51, smooth_order=3):
 
     calib = Calibration()
     calib.calibrate(scan_file, scan_id, auto_roi, user_roi, threshold,
-                    noise_percent, energy_resolution, show_plot, i0_name)
+                    noise_percent, energy_resolution, show_plot, i0_name,
+                    smooth_on, smooth_window, smooth_order)
     calib.save_to_file(output_file, extract_raw=extract_raw)

@@ -74,6 +74,12 @@ def get_parser():
                            help='Extract mythen raw data normalized by I0')
     calib_cmd.add_argument('--i0', default='n_i0_1',
                            help='Channel name used as IO')
+    calib_cmd.add_argument('--smooth_window', default=51, type=int,
+                           help='Smooth window use on savgol filter')
+    calib_cmd.add_argument('--smooth_order', default=3, type=int,
+                           help='Smooth window use on savgol filter')
+    calib_cmd.add_argument('--no_smooth', action='store_false',
+                           help='No use the savgol filter')
 
     # -------------------------------------------------------------------------
     #                           Spectra command
@@ -172,7 +178,10 @@ def main():
                              energy_resolution=args.energy_step,
                              show_plot=args.plot,
                              extract_raw=args.extract_raw,
-                             i0_name=args.i0)
+                             i0_name=args.i0,
+                             smooth_on=args.no_smooth,
+                             smooth_window=args.smooth_window,
+                             smooth_order=args.smooth_order)
 
         except Exception as e:
             log.error('The calibration failed: {}'.format(e))
