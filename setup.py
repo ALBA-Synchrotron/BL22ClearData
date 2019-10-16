@@ -41,6 +41,10 @@ setup(
     entry_points={
         'console_scripts': [
             'pyClear = bl22cleardata.__main__:main',
-        ]
-    }
+        ],
+
+    },
+    install_requires=['numpy', 'scipy', 'matplotlib'],
+    python_requires='>=3.5',
+
 )
