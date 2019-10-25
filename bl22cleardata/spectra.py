@@ -159,9 +159,12 @@ class Spectra:
 
         Y = overlap_vector / Ysum
         spectra = intensity_matrix.sum(axis=0) / overlap_vector
-        spectra_window = np.where(spectra > 0)
-        spectra = spectra[spectra_window]
-        self.spectra = spectra
+        # Use as spectra window the range of scanned energies
+        max_energy = max(energies)
+        min_energy = min(energies)
+        spectra_window = (cont_energy_scale > min_energy) & \
+                         (cont_energy_scale < max_energy)
+        self.spectra = spectra[spectra_window]
         self.energy_scale = cont_energy_scale[spectra_window]
         self.m_data = m_data
         self.scan_sum = Y
