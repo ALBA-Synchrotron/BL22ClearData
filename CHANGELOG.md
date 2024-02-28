@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Add install requirements 
 - Remove extrapolation of the energy scale to remove noise. 
+- Change bad pixel value
 
 [keepachangelog.com]: http://keepachangelog.com
 [1.0.X]: https://github.com/ALBA-Synchrotron/pyIcePAP/tree/1.0.1

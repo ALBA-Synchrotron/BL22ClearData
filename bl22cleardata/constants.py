@@ -28,7 +28,7 @@ CAZ = 'caz'
 
 # Mythen
 PIXEL_SIZE = 50e-6
-BAD_PIXEL = 1140
+BAD_PIXEL = 1000
 
 
 # Analyzer selector
